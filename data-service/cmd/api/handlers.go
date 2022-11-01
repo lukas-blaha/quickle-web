@@ -34,7 +34,7 @@ func (app *Config) ListDecks(w http.ResponseWriter, t *http.Request) {
 	}
 }
 
-func (app *Config) GetDeck(w http.ResponseWriter, r *http.Request) {
+func (app *Config) GetItems(w http.ResponseWriter, r *http.Request) {
 	deckParam := chi.URLParam(r, "deck")
 	idParam := r.URL.Query().Get("id")
 	termParam := r.URL.Query().Get("term")
@@ -124,6 +124,39 @@ func (app *Config) RemoveDeck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	delete(deck, deckParam)
+}
+
+func (app *Config) AddItem(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+
+	var item jsonResponse
+
+	err := app.checkDeck(w, deckParam)
+	if err != nil {
+		return
+	}
+
+	err = app.readJSON(w, r, &item)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	deck[deckParam] = append(deck[deckParam], item)
+}
+
+func (app *Config) AddDeck(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+
+	_, exists := deck[deckParam]
+	if exists {
+		app.errorJSON(w, errors.New("Deck already exists..."))
+		return
+	}
+
+	if deckParam != "" {
+		deck[deckParam] = []jsonResponse{}
+	}
 }
 
 func (app *Config) checkID(w http.ResponseWriter, deckParam, idParam string) (int, error) {
