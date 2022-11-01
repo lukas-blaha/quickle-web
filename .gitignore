@@ -1,0 +1,4 @@
+*.swp
+project/db-data/postgres/*
+front-end/frontendApp
+data-service/dataApp
