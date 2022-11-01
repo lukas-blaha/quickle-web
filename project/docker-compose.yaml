@@ -1,6 +1,30 @@
 version: '3'
 
 services:
+  data-service:
+    build:
+      context: ../front-end
+      dockerfile: ../front-end/front-end.dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  data-service:
+    build:
+      context: ../data-service
+      dockerfile: ../data-service/data-service.dockerfile
+    restart: always
+    ports:
+      - "8888:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=quickle sslmode=disable timezone=UTC connect_timeout=5"
+
   postgres:
     image: "postgres:15-alpine"
     ports:
