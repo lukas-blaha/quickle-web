@@ -40,9 +40,8 @@ func (app *Config) GetDeck(w http.ResponseWriter, r *http.Request) {
 	termParam := r.URL.Query().Get("term")
 
 	if idParam != "" {
-		id, err := strconv.Atoi(idParam)
+		id, err := app.parseID(w, idParam)
 		if err != nil {
-			app.errorJSON(w, errors.New("Can't parse id to int"))
 			return
 		}
 
@@ -74,9 +73,8 @@ func (app *Config) UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 	var item jsonResponse
 
-	id, err := strconv.Atoi(idParam)
+	id, err := app.parseID(w, idParam)
 	if err != nil {
-		app.errorJSON(w, errors.New("Can't parse id to int"))
 		return
 	}
 
@@ -93,4 +91,26 @@ func (app *Config) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	if item.Definition != "" {
 		deck[deckParam][id-1].Definition = item.Definition
 	}
+}
+
+func (app *Config) RemoveItem(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+	idParam := chi.URLParam(r, "id")
+
+	id, err := app.parseID(w, idParam)
+	if err != nil {
+		return
+	}
+
+	deck[deckParam] = append(deck[deckParam][:id-1], deck[deckParam][id:]...)
+}
+
+func (app *Config) parseID(w http.ResponseWriter, idParam string) (int, error) {
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		app.errorJSON(w, errors.New("Can't parse id to int"))
+		return 0, err
+	}
+
+	return id, err
 }
