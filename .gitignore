@@ -1,4 +1,4 @@
 *.sw*
-project/db-data/postgres/*
+quickle/db-data/postgres/*
 front-end/frontendApp
 data-service/dataApp
