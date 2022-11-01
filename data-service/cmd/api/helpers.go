@@ -8,9 +8,10 @@ import (
 )
 
 type jsonResponse struct {
-	ID         int    `json:"id,omitepmpty"`
+	ID         int    `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
 	Term       string `json:"term,omitempty"`
-	Definition int    `json:"definition,omitempty"`
+	Definition string `json:"definition,omitempty"`
 	Error      bool   `json:"error,omitempty"`
 	Message    string `json:"message,omitempty"`
 }
@@ -66,7 +67,7 @@ func (app *Config) errorJSON(w http.ResponseWriter, err error, status ...int) er
 		statusCode = status[0]
 	}
 
-	var payload Exercise
+	var payload jsonResponse
 	payload.Error = true
 	payload.Message = err.Error()
 

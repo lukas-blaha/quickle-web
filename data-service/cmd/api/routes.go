@@ -21,6 +21,8 @@ func (app *Config) routes() http.Handler {
 	}))
 
 	mux.Use(middleware.Heartbeat("/ping"))
+	mux.Get("/decks", app.ListDecks)
+	mux.Get("/deck/{deck}", app.GetDeck)
 
 	return mux
 }
