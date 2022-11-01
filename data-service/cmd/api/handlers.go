@@ -39,14 +39,14 @@ func (app *Config) GetDeck(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
 	termParam := r.URL.Query().Get("term")
 
-	if idParam != "" {
-		id, err := app.parseID(w, idParam)
-		if err != nil {
-			return
-		}
+	err := app.checkDeck(w, deckParam)
+	if err != nil {
+		return
+	}
 
-		if len(deck[deckParam]) < id-1 || id < 0 {
-			app.errorJSON(w, errors.New("No item matching requested id..."), http.StatusNotFound)
+	if idParam != "" {
+		id, err := app.checkID(w, deckParam, idParam)
+		if err != nil {
 			return
 		}
 
@@ -73,7 +73,12 @@ func (app *Config) UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 	var item jsonResponse
 
-	id, err := app.parseID(w, idParam)
+	err := app.checkDeck(w, deckParam)
+	if err != nil {
+		return
+	}
+
+	id, err := app.checkID(w, deckParam, idParam)
 	if err != nil {
 		return
 	}
@@ -97,7 +102,12 @@ func (app *Config) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	deckParam := chi.URLParam(r, "deck")
 	idParam := chi.URLParam(r, "id")
 
-	id, err := app.parseID(w, idParam)
+	err := app.checkDeck(w, deckParam)
+	if err != nil {
+		return
+	}
+
+	id, err := app.checkID(w, deckParam, idParam)
 	if err != nil {
 		return
 	}
@@ -105,12 +115,41 @@ func (app *Config) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	deck[deckParam] = append(deck[deckParam][:id-1], deck[deckParam][id:]...)
 }
 
-func (app *Config) parseID(w http.ResponseWriter, idParam string) (int, error) {
+func (app *Config) RemoveDeck(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+
+	err := app.checkDeck(w, deckParam)
+	if err != nil {
+		return
+	}
+
+	delete(deck, deckParam)
+}
+
+func (app *Config) checkID(w http.ResponseWriter, deckParam, idParam string) (int, error) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		app.errorJSON(w, errors.New("Can't parse id to int"))
 		return 0, err
 	}
 
-	return id, err
+	if len(deck[deckParam]) < id-1 || id < 0 {
+		err = errors.New("No item matching requested id...")
+		app.errorJSON(w, err, http.StatusNotFound)
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (app *Config) checkDeck(w http.ResponseWriter, deckParam string) error {
+	for d, _ := range deck {
+		if d == deckParam {
+			return nil
+		}
+	}
+
+	err := errors.New("Deck not found...")
+	app.errorJSON(w, err, http.StatusNotFound)
+	return err
 }
