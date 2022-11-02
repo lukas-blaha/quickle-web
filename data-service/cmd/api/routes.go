@@ -26,6 +26,7 @@ func (app *Config) routes() http.Handler {
 	mux.Post("/deck/{deck}", app.AddItem)
 	mux.Patch("/deck/{deck}/{id}", app.UpdateItem)
 	mux.Delete("/deck/{deck}/{id}", app.RemoveItem)
+	mux.Delete("/deck/{deck}", app.RemoveDeck)
 
 	return mux
 }

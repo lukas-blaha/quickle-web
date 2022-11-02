@@ -25,19 +25,47 @@ func New(dbPool *sql.DB) Models {
 }
 
 type Item struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	Term       string `json:"term"`
-	Definition string `json:"definition"`
+	ID         int    `json:"id,omitempty"`
+	Deck       string `json:"deck,omitempty"`
+	Term       string `json:"term,omitempty"`
+	Definition string `json:"definition,omitempty"`
+}
+
+func (i *Item) GetDecks() ([]*Item, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `select distinct deck from quickle`
+
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []*Item
+
+	for rows.Next() {
+		var item Item
+		err = rows.Scan(&item.Deck)
+		if err != nil {
+			log.Println("Error scanning", err)
+			return nil, err
+		}
+
+		items = append(items, &item)
+	}
+
+	return items, nil
 }
 
 func (i *Item) GetAll(deck string) ([]*Item, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select id, term, definition from $1 order by id`
+	stmt := `select id, deck, term, definition from quickle where deck = $1 order by id`
 
-	rows, err := db.QueryContext(ctx, query, deck)
+	rows, err := db.QueryContext(ctx, stmt, deck)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +77,7 @@ func (i *Item) GetAll(deck string) ([]*Item, error) {
 		var item Item
 		err = rows.Scan(
 			&item.ID,
+			&item.Deck,
 			&item.Term,
 			&item.Definition,
 		)
@@ -68,12 +97,13 @@ func (i *Item) GetByID(deck, id string) (*Item, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select id, term, definition from $1 where id = $2`
+	query := `select id, deck, term, definition from quickle where deck = $1 and id = $2`
 
 	var item Item
 	row := db.QueryRowContext(ctx, query, deck, id)
 	err := row.Scan(
 		&item.ID,
+		&item.Deck,
 		&item.Term,
 		&item.Definition,
 	)
@@ -89,12 +119,13 @@ func (i *Item) GetByTerm(deck, term string) (*Item, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select id, term, definition from $1 where term = $2`
+	query := `select id, deck, term, definition from quickle where deck = $1 and term = $2`
 
 	var item Item
 	row := db.QueryRowContext(ctx, query, deck, term)
 	err := row.Scan(
 		&item.ID,
+		&item.Deck,
 		&item.Term,
 		&item.Definition,
 	)
@@ -106,21 +137,21 @@ func (i *Item) GetByTerm(deck, term string) (*Item, error) {
 	return &item, nil
 }
 
-func (i *Item) Update(deck, def, term, id string) error {
+func (i *Item) Update(def, term, id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	var stmt string
 
 	if def != "" && term != "" {
-		stmt = `update $1 set term = $3, definition = $4 where id = $2`
+		stmt = `update quickle set term = $2, definition = $3 where id = $1`
 	} else if term != "" {
-		stmt = `update $1 set term = $3 where id = $2`
+		stmt = `update quickle set term = $2 where id = $1`
 	} else if def != "" {
-		stmt = `update $1 set definition = $4 where id = $2`
+		stmt = `update quickle set definition = $3 where id = $1`
 	}
 
-	_, err := db.ExecContext(ctx, stmt, deck, id, term, def)
+	_, err := db.ExecContext(ctx, stmt, id, term, def)
 	if err != nil {
 		return err
 	}
@@ -128,13 +159,27 @@ func (i *Item) Update(deck, def, term, id string) error {
 	return nil
 }
 
-func (i *Item) Delete(deck, id string) error {
+func (i *Item) Delete(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	stmt := `delete from $1 where id = $2`
+	stmt := `delete from quickle where id = $1`
 
-	_, err := db.ExecContext(ctx, stmt, deck, id)
+	_, err := db.ExecContext(ctx, stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *Item) DeleteDeck(deck string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	stmt := `delete from quickle where deck = $1`
+
+	_, err := db.ExecContext(ctx, stmt, deck)
 	if err != nil {
 		return err
 	}
@@ -147,8 +192,7 @@ func (i *Item) Insert(deck, term, def string) (int, error) {
 	defer cancel()
 
 	var newID int
-	stmt := `insert into $1 (term, definition)
-		values ($2, $3) returning id`
+	stmt := `insert into quickle (deck, term, definition) values ($1, $2, $3) returning id`
 
 	err := db.QueryRowContext(ctx, stmt, deck, term, def).Scan(&newID)
 	if err != nil {
@@ -156,32 +200,4 @@ func (i *Item) Insert(deck, term, def string) (int, error) {
 	}
 
 	return newID, nil
-}
-
-func (i *Item) GetTables() ([]*Item, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
-
-	query := `select tablename from pg_catalog.pg_tables where schemaname = 'public'`
-
-	rows, err := db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var items []*Item
-
-	for rows.Next() {
-		var item Item
-		err = rows.Scan(&item.Name)
-		if err != nil {
-			log.Println("Error scanning", err)
-			return nil, err
-		}
-
-		items = append(items, &item)
-	}
-
-	return items, nil
 }

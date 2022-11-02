@@ -9,7 +9,7 @@ import (
 
 type jsonResponse struct {
 	ID         int    `json:"id,omitempty"`
-	Name       string `json:"name,omitempty"`
+	Deck       string `json:"deck,omitempty"`
 	Term       string `json:"term,omitempty"`
 	Definition string `json:"definition,omitempty"`
 	Error      bool   `json:"error,omitempty"`
