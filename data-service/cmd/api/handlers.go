@@ -19,6 +19,18 @@ func (app *Config) ListDecks(w http.ResponseWriter, t *http.Request) {
 	}
 }
 
+func (app *Config) DeckRange(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+
+	item, err := app.Models.Item.GetDeckRange(deckParam)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, item)
+}
+
 func (app *Config) GetItems(w http.ResponseWriter, r *http.Request) {
 	deckParam := chi.URLParam(r, "deck")
 	idParam := r.URL.Query().Get("id")

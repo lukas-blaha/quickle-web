@@ -23,6 +23,7 @@ func (app *Config) routes() http.Handler {
 	mux.Use(middleware.Heartbeat("/ping"))
 	mux.Get("/decks", app.ListDecks)
 	mux.Get("/deck/{deck}", app.GetItems)
+	mux.Get("/deck/{deck}/l", app.DeckRange)
 	mux.Post("/deck/{deck}", app.AddItem)
 	mux.Patch("/deck/{deck}/{id}", app.UpdateItem)
 	mux.Delete("/deck/{deck}/{id}", app.RemoveItem)

@@ -27,6 +27,8 @@ func New(dbPool *sql.DB) Models {
 type Item struct {
 	ID         int    `json:"id,omitempty"`
 	Deck       string `json:"deck,omitempty"`
+	First      int    `json:"first,omitempty"`
+	Last       int    `json:"last,omitempty"`
 	Term       string `json:"term,omitempty"`
 	Definition string `json:"definition,omitempty"`
 }
@@ -57,6 +59,26 @@ func (i *Item) GetDecks() ([]*Item, error) {
 	}
 
 	return items, nil
+}
+
+func (i *Item) GetDeckRange(deck string) (*Item, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `select min(id), max(id) from quickle where deck = $1`
+
+	var item Item
+
+	row := db.QueryRowContext(ctx, query, deck)
+	err := row.Scan(
+		&item.First,
+		&item.Last,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &item, nil
 }
 
 func (i *Item) GetAll(deck string) ([]*Item, error) {
