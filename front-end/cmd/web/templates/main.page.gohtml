@@ -1,0 +1,123 @@
+{{template "base" .}}
+
+{{define "content" }}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="mt-5">Quickle testing</h1>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4 class="mt-5">Term</h4>
+                <div class="mt-1 text-center fs-1 rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
+                    <pre id="term"><span class="text-muted"></span></pre>
+                </div>
+            </div>
+            <div class="col">
+                <h4 class="mt-5">Definition</h4>
+                <div class="mt-1 text-center fs-1 rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
+                    <pre id="definition"><span class="text-muted"></span></pre>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+								<hr>
+								<a id="prevBtn" class="btn btn-outline-secondary float-end" href="javascript:void(0);">Prev</a>
+            </div>
+            <div class="col">
+								<hr>
+									<a id="nextBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Next</a>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+{{define "js"}}
+		<script>
+			const nextBtn = document.getElementById("nextBtn");
+			const prevBtn = document.getElementById("prevBtn");
+			const termBox = document.getElementById("term");
+			const defBox = document.getElementById("definition");
+
+			let deck = 'fruit';
+			let idParam = 0;
+			let firstId = 0;
+			let lastId = 0;
+
+			const getRange = async function(deck) {
+				try {
+					const deckRange = await fetch(`http://localhost:8888/deck/${deck}/l`);
+					const rng = await deckRange.json();
+
+					if (!deckRange.ok) throw new Error(`${rng.message}`);
+
+					firstId = rng.first;
+					lastId = rng.last;
+					idParam = firstId;
+
+					showObject(deck, idParam)
+				} catch (err) {
+					alert(err)
+				}
+			}
+
+			const showObject = async function(deck, id) {
+				try {
+					const res = await fetch(`http://localhost:8888/deck/${deck}?id=${id}`);
+					const data = await res.json();
+
+					if (!res.ok) throw new Error(`${data.message}`)
+
+					console.log(res, data);
+
+					let term = data.term;
+					termBox.textContent = term;
+					let def = data.definition;
+					defBox.textContent = def;
+
+					console.log(term, def)
+
+				} catch (err) {
+					alert(err);
+				}
+			}
+
+			getRange(deck)
+
+			const iterate = function(a) {
+				if (a === 'next') {
+					if (idParam < lastId) {
+						idParam++;
+						showObject(deck, idParam);
+					}
+				} else if (a === 'prev') {
+					if (idParam > firstId) {
+						idParam--;
+						showObject(deck, idParam);
+					}
+				}
+			}
+
+			nextBtn.addEventListener('click', function() {
+				iterate('next');
+			});
+
+			prevBtn.addEventListener('click', function() {
+				iterate('prev');
+			});
+
+			document.addEventListener('keydown', function(e) {
+				if (e.key === 'ArrowLeft') {
+					iterate('prev');
+				}
+
+				if (e.key === 'ArrowRight') {
+					iterate('next');
+				}
+			});
+
+    </script>
+{{end}}

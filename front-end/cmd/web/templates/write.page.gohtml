@@ -1,0 +1,250 @@
+{{template "base" .}}
+
+{{define "content" }}
+		<style>
+			.hidden {
+			  display: none;
+			}
+			
+			.custom-modal {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  width: 70%;
+			
+			  background-color: white;
+			  padding: 2rem;
+			  border-radius: 5px;
+			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+			  z-index: 10;
+			}
+			
+			.overlay {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%;
+			  background-color: rgba(0, 0, 0, 0.6);
+			  backdrop-filter: blur(3px);
+			  z-index: 5;
+			}
+		</style>
+    <div class="container">
+			<div class="custom-modal hidden">
+				<div class="mt-1 fs-1 rounded text-center">
+					<div class="row">
+						<div class="col">
+							<pre><span>TOTAL:</span></pre>
+						</div>
+						<div class="col">
+							<pre id="correctModal"><span>0</span></pre>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<pre><span>MISTAKES:</span></pre>
+						</div>
+						<div class="col">
+							<pre id="incorrectModal"><span>0</span></pre>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<a id="againBtn" class="btn btn-outline-secondary float-end" href="javascript:void(0);">Try again</a>
+						</div>
+						<div class="col">
+							<a id="backBtn2" class="btn btn-outline-secondary float-start" href="javascript:void(0);">Back</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="overlay hidden"></div>
+        <div class="row">
+            <div class="col">
+                <h1 class="mt-5">Quickle Write</h1>
+                <hr>
+            </div>
+        </div>
+        <div class="row row-cols-2">
+					<div class="col-sm-3">
+						<div class="mt-1 fs-5 rounded" style="padding: 2em;">
+							<div class="row">
+								<div class="col">
+									<pre><span>REMAINING</span></pre>
+								</div>
+								<div class="col">
+									<pre id="remaining"><span></span></pre>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col">
+									<pre><span>INCORRECT</span></pre>
+								</div>
+								<div class="col">
+              <pre id="incorrect"><span>0</span></pre>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col">
+									<pre><span>CORRECT</span></pre>
+								</div>
+								<div class="col">
+									<pre id="correct"><span>0</span></pre>
+								</div>
+							</div>
+							<div class="row back-button">
+								<a id="backBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Back</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-9">
+						<div class="mt-1 fs-2 rounded" style="outline: 1px solid silver; padding: 2em;">
+              <pre id="term"><span></span></pre>
+							<hr>
+							<div class="input-group input-group-lg" style="outline: 0px">
+							  <input id="answer" type="text" class="form-control rounded" placeholder="Type here...">
+								<a id="sendBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-left: 1em;">Answer</a>
+							</div>
+						</div>
+					</div>
+				</div>
+    </div>
+{{end}}
+
+{{define "js"}}
+		<script>
+			'use strict';
+
+			const backBtn = document.getElementById("backBtn");
+			const backBtn2 = document.getElementById("backBtn2");
+			const sendBtn = document.getElementById("sendBtn");
+			const againBtn = document.getElementById("againBtn");
+			const answer = document.getElementById('answer');
+			const termText = document.getElementById('term');
+			const remaining = document.getElementById('remaining');
+			const incorrect = document.getElementById('incorrect');
+			const correct = document.getElementById('correct');
+			const modal = document.querySelector('.custom-modal');
+			const overlay = document.querySelector('.overlay');
+			const incorrectModal = document.getElementById('incorrectModal');
+			const correctModal = document.getElementById('correctModal');
+
+			const fail = [];
+			let deck = 'fruit';
+			let idParam = 0;
+			let firstId = 0;
+			let lastId = 0;
+			let len = 0;
+			let term = '';
+			let def = '';
+
+			const getRange = async function(deck) {
+				try {
+					const deckRange = await fetch(`http://localhost:8888/deck/${deck}/l`);
+					const rng = await deckRange.json();
+
+					if (!deckRange.ok) throw new Error(`${rng.message}`);
+
+					firstId = rng.first;
+					lastId = rng.last;
+					idParam = firstId;
+					len = lastId - firstId + 1;
+
+					showObject(deck, idParam);
+					remaining.textContent = len;
+
+				} catch (err) {
+					alert(err)
+				}
+			}
+
+			const showObject = async function(deck, id) {
+				try {
+					const res = await fetch(`http://localhost:8888/deck/${deck}?id=${id}`);
+					const data = await res.json();
+
+					if (!res.ok) throw new Error(`${data.message}`)
+
+					term = data.term;
+					def = data.definition;
+
+					termText.textContent = term;
+
+					console.log(term, def)
+
+				} catch (err) {
+					alert(err);
+				}
+			}
+
+			getRange(deck)
+
+			const sleep = function(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+				   
+			}
+
+			const changeBtn = function(msg) {
+				answer.value = '';
+				sendBtn.textContent = msg;
+			}
+
+			const changeBtnBack = async function() {
+				await sleep(2000)
+				sendBtn.textContent = 'Answer';
+			}
+
+			const manage = function() {
+				console.log(Number(correct.textContent), len)
+				next();
+				if (answer.value === def) {
+					correct.textContent = Number(correct.textContent) + 1;
+					remaining.textContent = Number(remaining.textContent) - 1;
+					changeBtn('Correct!');
+					changeBtnBack();
+				} else {
+					incorrect.textContent = Number(incorrect.textContent) + 1;
+					changeBtn('Wrong!');
+					changeBtnBack();
+					fail.push(idParam - 1);
+				}
+
+				if (Number(correct.textContent) === len) {
+					correctModal.textContent = len;
+					incorrectModal.textContent = incorrect.textContent;
+					modal.classList.remove('hidden');
+					overlay.classList.remove('hidden');
+				}
+			}
+
+			const next = function() {
+				if (Number(correct.textContent) < len) {
+					if (idParam < lastId) {
+						idParam++;
+						showObject(deck, idParam);
+					} else if (fail.length > 0) {
+						showObject(deck, Number(fail.shift()));
+					}
+				}
+			}
+
+			sendBtn.addEventListener('click', function() {
+				manage();
+			});
+
+			againBtn.addEventListener('click', function() {
+				location.reload();
+				return false;
+			});
+
+			document.addEventListener('keyup', function(e) {
+				if (Number(correct.textContent) < len) {
+					if (e.key === 'Enter') {
+						manage();
+					}
+				}
+			});
+    </script>
+{{end}}

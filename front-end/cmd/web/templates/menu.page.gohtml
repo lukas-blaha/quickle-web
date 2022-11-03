@@ -1,0 +1,38 @@
+{{template "base" .}}
+
+{{define "content" }}
+		<style>
+			.deck {
+				margin: 1em;
+				width: 80%;
+				font-size: 2.5vw;
+			}
+		</style>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="mt-5">Study sets</h1>
+                <hr>
+            </div>
+        </div>
+				<div class="row row-cols-3">
+				{{range .}}
+					<div class="col text-center">
+						<a id="{{.Deck}}Btn" class="btn btn-lg btn-outline-secondary deck" href="javascript:void(0);">{{.Deck}}</a>
+					</div>
+				{{end}}
+				</div>
+    </div>
+{{end}}
+
+{{define "js"}}
+		<script>
+			{{range .}}
+				const {{.Deck}}Btn = document.getElementById("{{.Deck}}Btn");
+
+				{{.Deck}}Btn.addEventListener('click', function() {
+					window.location = 'http://localhost:8080/write/{{.Deck}}';
+				});
+			{{end}}
+    </script>
+{{end}}
