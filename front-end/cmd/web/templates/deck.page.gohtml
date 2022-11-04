@@ -3,42 +3,108 @@
 {{define "content" }}
 		<style>
 			.custom-cont {
-				margin: 2em;
-				width: 80%;
-				font-size: 2.0vw;
+				font-size: 2.5vh;
 			}
-
 			.custom-btn {
-				margin: 2em;
+				margin-top: 2em;
+				margin-bottom: 1em;
+			}
+			.close-modal {
+			  position: absolute;
+			  top: 0rem;
+			  right: 2rem;
+			  font-size: 2.5rem;
+			  color: #333;
+			  cursor: pointer;
+			  border: none;
+			  background: none;
+			}
+			.hidden {
+			  display: none;
+			}
+			.custom-modal {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  width: 70%;
+			
+			  background-color: white;
+			  padding: 2rem;
+			  border-radius: 5px;
+			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+			  z-index: 10;
+			}
+			.overlay {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%;
+			  background-color: rgba(0, 0, 0, 0.6);
+			  backdrop-filter: blur(3px);
+			  z-index: 5;
 			}
 		</style>
-    <div class="container">
-        <div class="row row-cols-3">
-          <div class="col-sm-1">
-							<a id="cardBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);" style="margin-left: 1em;">Cards</a>
-          </div>
-          <div class="col-6">
-							<a id="writeBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);" style="margin-left: 1em;">Write</a>
-          </div>
-          <div class="col">
-							<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
-          </div>
-        </div>
-				<hr>
-				{{range .}}
+		<div class="container">
+			<div class="custom-modal hidden">
+				<div class="row row-cols-1">
+					<div class="col">
+						<button class="close-modal">&times;</button>
+					</div>
+				</div>
 				<div class="row row-cols-2">
-					<div class="col text-center">
-						<div class="mt-1 text-center rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
-              <pre><span class="custom-cont">{{.Term}}</span></pre>
+					<div class="col">
+						<div class="input-group input-group-lg" style="outline: 0px">
+						  <input id="termText" type="text" class="form-control rounded" placeholder="Term here..." style="margin-top: 2em;">
 						</div>
 					</div>
-					<div class="col text-center">
-						<div class="mt-1 text-center rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
-              <pre><span class="custom-cont">{{.Definition}}</span></pre>
+					<div class="col">
+						<div class="input-group input-group-lg" style="outline: 0px">
+						  <input id="defText" type="text" class="form-control rounded" placeholder="Definition here..." style="margin-top: 2em;">
 						</div>
 					</div>
 				</div>
-				{{end}}
+				<hr>
+				<div class="row row-cols-1">
+					<div class="col text-center">
+						<a id="addNewBtn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">Add</a>
+					</div>
+				</div>
+			</div>
+			<div class="overlay hidden"></div>
+      <div class="row row-cols-4">
+				<div class="col-sm-1">
+					<a id="cardBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Cards</a>
+        </div>
+        <div class="col-7">
+					<a id="writeBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Write</a>
+        </div>
+        <div class="col">
+					<a id="createBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
+        </div>
+        <div class="col-sm-1">
+					<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Back</a>
+        </div>
+      </div>
+			<hr>
+			{{range .}}
+			<div class="row row-cols-3">
+				<div class="col-5 text-center">
+					<div class="mt-1 text-center rounded" style="outline: 1px solid silver; padding: 1em;">
+            <pre><span class="custom-cont">{{.Term}}</span></pre>
+					</div>
+				</div>
+				<div class="col-5 text-center">
+					<div class="mt-1 text-center rounded" style="outline: 1px solid silver; padding: 1em;">
+            <pre><span class="custom-cont">{{.Definition}}</span></pre>
+					</div>
+				</div>
+				<div class="col-sm-2 text-center my-auto">
+					<a id="del{{.ID}}Btn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">🗑️</a>
+				</div>
+			</div>
+			{{end}}
     </div>
 {{end}}
 
@@ -47,19 +113,104 @@
 			const cardBtn = document.getElementById("cardBtn");
 			const writeBtn = document.getElementById("writeBtn");
 			const backBtn = document.getElementById("backBtn");
+			const createBtn = document.getElementById("createBtn");
+			const addNewBtn = document.getElementById("addNewBtn");
+			const modal = document.querySelector('.custom-modal');
+			const overlay = document.querySelector('.overlay');
+			const termText = document.getElementById("termText");
+			const defText = document.getElementById("defText");
 
-			const baseURL = 'http://front-end:8080';
+			{{range .}}
+			const del{{.ID}}Btn = document.getElementById("del{{.ID}}Btn");
+			{{end}}
+
+			const frontURL = 'http://localhost';
+			const apiURL = 'http://localhost:8888';
+			const deck = '{{(index . 0).Deck}}';
+
+			const sleep = function(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			const changeBtnBack = async function(n) {
+				await sleep(2000);
+				addNewBtn.textContent = n;
+			}
+
+			const addNewItem = function() {
+				if (termText.value === "" || defText.value === "") {
+					console.log('Something went wrong');
+					addNewBtn.textContent = "Empty!";
+					changeBtnBack('Add');
+				} else {
+					const newItemUrl = `${apiURL}/deck/${deck}`
+					const data = {
+						"term": termText.value,
+						"definition": defText.value
+					};
+					console.log(newItemUrl)
+					fetch(newItemUrl, {
+						method: "POST",
+						body: JSON.stringify(data),
+						headers: {
+							"Content-Type": "application/json"
+						}
+					});
+					termText.value = "";
+					defText.value = "";
+				}
+			}
+
+			createBtn.addEventListener('click', function() {
+				modal.classList.remove('hidden');
+				overlay.classList.remove('hidden');
+			});
+
+			addNewBtn.addEventListener('click', addNewItem);
+
+			overlay.addEventListener('click', function() {
+				modal.classList.add('hidden');
+				overlay.classList.add('hidden');
+				location.reload();
+				return false;
+			});
 
 			cardBtn.addEventListener('click', function() {
-				window.location = `${baseURL}/{{(index . 0).Deck}}/cards`;
+				window.location = `${frontURL}/${deck}/cards`;
 			});
 
 			writeBtn.addEventListener('click', function() {
-				window.location = `${baseURL}/{{(index . 0).Deck}}/write`;
+				window.location = `${frontURL}/${deck}/write`;
 			});
 
 			backBtn.addEventListener('click', function() {
-				window.location = `${baseURL}/`;
+				window.location = `${frontURL}/`;
+			});
+
+			{{range .}}
+			del{{.ID}}Btn.addEventListener('click', async function() {
+				const newItemUrl = `${apiURL}/deck/${deck}/{{.ID}}`
+				await fetch(newItemUrl, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				location.reload();
+				return false;
+			});
+			{{end}}
+
+			document.addEventListener('keyup', function(e) {
+				if (e.key == 'Escape' && !modal.classList.contains('hidden')) {
+					modal.classList.add('hidden');
+					overlay.classList.add('hidden');
+					location.reload();
+					return false;
+				}
+				if (e.key == 'Enter' && !modal.classList.contains('hidden')) {
+					addNewItem()
+				}
 			});
     </script>
 {{end}}
