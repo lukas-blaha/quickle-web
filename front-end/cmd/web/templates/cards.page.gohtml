@@ -2,28 +2,34 @@
 
 {{define "content" }}
 		<style>
-				.centered{
-						position: relative;
-				    top:50%;
-				    transform: translateY(-50%);
-				}
-				.card {
-						margin-left: 25%;
-						margin-right: 25%;
-						width: 50%;
-				}
+			.centered{
+					position: relative;
+				  top:50%;
+				  transform: translateY(-50%);
+			}
+			.card {
+					margin-left: 25%;
+					margin-right: 25%;
+					width: 50%;
+			}
+			.custom-btn {
+				margin: 2em;
+			}
 		</style>
     <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1 class="mt-5">Quickle Cards</h1>
-                <hr>
-            </div>
+        <div class="row row-cols-2">
+          <div class="col">
+              <h1 class="mt-5">Cards</h1>
+          </div>
+					<div class="col">
+						<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
+					</div>
         </div>
+        <hr>
         <div class="row row-cols-1">
 					<div class="col">
 						<div id="card" class="mt-1 text-center fs-1 rounded my-auto card" style="outline: 1px solid silver; padding: 2em;">
-              <pre id="card-text"><span class="centered">jahoda</span></pre>
+              <pre id="card-text"><span class="centered"></span></pre>
 						</div>
 					</div>
 				</div>
@@ -44,14 +50,37 @@
 		<script>
 			const nextBtn = document.getElementById("nextBtn");
 			const prevBtn = document.getElementById("prevBtn");
+			const backBtn = document.getElementById("backBtn");
 			const card = document.getElementById('card');
 			const cardText = document.getElementById('card-text');
 
 
-			let deck = 'fruit';
+			let deck = '{{.}}';
 			let idParam = 0;
 			let firstId = 0;
 			let lastId = 0;
+			let start = true;
+
+			const showObject = async function(deck, id) {
+				try {
+					const res = await fetch(`http://localhost:8888/deck/${deck}?id=${id}`);
+					const data = await res.json();
+
+					if (!res.ok) throw new Error(`${data.message}`)
+
+					let term = data.term;
+					let def = data.definition;
+
+					if (cardText.textContent === term) {
+						cardText.textContent = def;
+					} else {
+						cardText.textContent = term;
+					}
+
+				} catch (err) {
+					alert(err);
+				}
+			}
 
 			const getRange = async function(deck) {
 				try {
@@ -64,41 +93,15 @@
 					lastId = rng.last;
 					idParam = firstId;
 
+					if (start) {
+						showObject(deck, idParam);
+						start = false;
+					}
+
 				} catch (err) {
 					alert(err)
 				}
 			}
-
-			const showObject = async function(deck, id) {
-				try {
-					const res = await fetch(`http://localhost:8888/deck/${deck}?id=${id}`);
-					const data = await res.json();
-
-					if (!res.ok) throw new Error(`${data.message}`)
-
-					console.log(res, data);
-
-					let term = data.term;
-					let def = data.definition;
-
-					if (cardText.textContent === term) {
-						cardText.textContent = def;
-					} else {
-						cardText.textContent = term;
-					}
-
-					console.log(term, def)
-
-				} catch (err) {
-					alert(err);
-				}
-			}
-
-			getRange(deck)
-
-			card.addEventListener('click', function() {
-				showObject(deck, idParam)
-			});
 
 			const iterate = function(a) {
 				if (a === 'next') {
@@ -114,12 +117,22 @@
 				}
 			}
 
+			getRange(deck)
+
+			card.addEventListener('click', function() {
+				showObject(deck, idParam)
+			});
+
 			nextBtn.addEventListener('click', function() {
 				iterate('next');
 			});
 
 			prevBtn.addEventListener('click', function() {
 				iterate('prev');
+			});
+
+			backBtn.addEventListener('click', function() {
+				window.location = `http://localhost:8080/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {

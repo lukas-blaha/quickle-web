@@ -30,13 +30,17 @@
 			  backdrop-filter: blur(3px);
 			  z-index: 5;
 			}
+
+			.custom-btn {
+				margin: 2em;
+			}
 		</style>
     <div class="container">
 			<div class="custom-modal hidden">
 				<div class="mt-1 fs-1 rounded text-center">
 					<div class="row">
 						<div class="col">
-							<pre><span>TOTAL:</span></pre>
+							<pre><span>ITEMS TOTAL:</span></pre>
 						</div>
 						<div class="col">
 							<pre id="correctModal"><span>0</span></pre>
@@ -63,10 +67,13 @@
 			<div class="overlay hidden"></div>
         <div class="row">
             <div class="col">
-                <h1 class="mt-5">Quickle Write</h1>
-                <hr>
+                <h1 class="mt-5">Write</h1>
             </div>
+					<div class="col">
+						<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
+					</div>
         </div>
+				<hr>
         <div class="row row-cols-2">
 					<div class="col-sm-3">
 						<div class="mt-1 fs-5 rounded" style="padding: 2em;">
@@ -93,9 +100,6 @@
 								<div class="col">
 									<pre id="correct"><span>0</span></pre>
 								</div>
-							</div>
-							<div class="row back-button">
-								<a id="backBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Back</a>
 							</div>
 						</div>
 					</div>
@@ -132,13 +136,48 @@
 			const correctModal = document.getElementById('correctModal');
 
 			const fail = [];
-			let deck = 'fruit';
+			let deck = '{{.}}';
 			let idParam = 0;
 			let firstId = 0;
 			let lastId = 0;
+			let ids = 0;
 			let len = 0;
 			let term = '';
 			let def = '';
+
+			/*
+			const shuffle = function(array) {
+				const arrLen = array.length;
+				for (let i = (arrLen—1); i > 0; i--){
+				  const j = Math.floor(Math.random() * i);
+				  const temp = array[i];
+				  array[i] = array[j];
+				  array[j] = temp;
+				}
+
+				return array;
+			}
+			*/
+
+			const shuff = function(a) {
+				let j, x, i;
+				for (i = a.length - 1; i > 0; i--) {
+					j = Math.floor(Math.random() * (i + 1));
+					x = a[i];
+					a[i] = a[j];
+					a[j] = x;
+				}
+				return a;
+			}
+
+			const getArr = function(s, e) {
+				let arr = [];
+				for (let i = s; i < e+1; i++) {
+					arr.push(i);
+				}
+
+				return arr;
+			}
 
 			const getRange = async function(deck) {
 				try {
@@ -149,8 +188,11 @@
 
 					firstId = rng.first;
 					lastId = rng.last;
-					idParam = firstId;
 					len = lastId - firstId + 1;
+
+					let arr = getArr(firstId, lastId);
+					ids = shuff(arr);
+					idParam = ids.shift();
 
 					showObject(deck, idParam);
 					remaining.textContent = len;
@@ -172,14 +214,10 @@
 
 					termText.textContent = term;
 
-					console.log(term, def)
-
 				} catch (err) {
 					alert(err);
 				}
 			}
-
-			getRange(deck)
 
 			const sleep = function(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -197,8 +235,6 @@
 			}
 
 			const manage = function() {
-				console.log(Number(correct.textContent), len)
-				next();
 				if (answer.value === def) {
 					correct.textContent = Number(correct.textContent) + 1;
 					remaining.textContent = Number(remaining.textContent) - 1;
@@ -208,7 +244,8 @@
 					incorrect.textContent = Number(incorrect.textContent) + 1;
 					changeBtn('Wrong!');
 					changeBtnBack();
-					fail.push(idParam - 1);
+					fail.push(idParam);
+					console.log(idParam)
 				}
 
 				if (Number(correct.textContent) === len) {
@@ -217,18 +254,22 @@
 					modal.classList.remove('hidden');
 					overlay.classList.remove('hidden');
 				}
+				next();
 			}
 
 			const next = function() {
 				if (Number(correct.textContent) < len) {
-					if (idParam < lastId) {
-						idParam++;
+					if (ids.length > 0) {
+						idParam = ids.shift();
 						showObject(deck, idParam);
 					} else if (fail.length > 0) {
-						showObject(deck, Number(fail.shift()));
+						idParam = fail.shift();
+						showObject(deck, idParam);
 					}
 				}
 			}
+
+			getRange(deck)
 
 			sendBtn.addEventListener('click', function() {
 				manage();
@@ -237,6 +278,14 @@
 			againBtn.addEventListener('click', function() {
 				location.reload();
 				return false;
+			});
+
+			backBtn.addEventListener('click', function() {
+				window.location = `http://localhost:8080/${deck}`;
+			});
+
+			backBtn2.addEventListener('click', function() {
+				window.location = `http://localhost:8080/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {
