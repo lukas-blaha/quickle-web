@@ -1,0 +1,63 @@
+{{template "base" .}}
+
+{{define "content" }}
+		<style>
+			.custom-cont {
+				margin: 2em;
+				width: 80%;
+				font-size: 2.0vw;
+			}
+
+			.custom-btn {
+				margin: 2em;
+			}
+		</style>
+    <div class="container">
+        <div class="row row-cols-3">
+          <div class="col-sm-1">
+							<a id="cardBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);" style="margin-left: 1em;">Cards</a>
+          </div>
+          <div class="col-6">
+							<a id="writeBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);" style="margin-left: 1em;">Write</a>
+          </div>
+          <div class="col">
+							<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
+          </div>
+        </div>
+				<hr>
+				{{range .}}
+				<div class="row row-cols-2">
+					<div class="col text-center">
+						<div class="mt-1 text-center rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
+              <pre><span class="custom-cont">{{.Term}}</span></pre>
+						</div>
+					</div>
+					<div class="col text-center">
+						<div class="mt-1 text-center rounded my-auto" style="outline: 1px solid silver; padding: 2em;">
+              <pre><span class="custom-cont">{{.Definition}}</span></pre>
+						</div>
+					</div>
+				</div>
+				{{end}}
+    </div>
+{{end}}
+
+{{define "js"}}
+		<script>
+			const cardBtn = document.getElementById("cardBtn");
+			const writeBtn = document.getElementById("writeBtn");
+			const backBtn = document.getElementById("backBtn");
+
+			cardBtn.addEventListener('click', function() {
+				window.location = 'http://localhost:8080/{{(index . 0).Deck}}/cards';
+			});
+
+			writeBtn.addEventListener('click', function() {
+				window.location = 'http://localhost:8080/{{(index . 0).Deck}}/write';
+			});
+
+			backBtn.addEventListener('click', function() {
+				window.location = 'http://localhost:8080/';
+			});
+    </script>
+{{end}}
