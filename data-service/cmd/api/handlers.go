@@ -14,9 +14,7 @@ func (app *Config) ListDecks(w http.ResponseWriter, t *http.Request) {
 		app.errorJSON(w, err)
 	}
 
-	for _, i := range items {
-		app.writeJSON(w, http.StatusOK, i)
-	}
+	app.writeJSON(w, http.StatusOK, items)
 }
 
 func (app *Config) DeckRange(w http.ResponseWriter, r *http.Request) {
@@ -64,9 +62,7 @@ func (app *Config) GetItems(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		for _, i := range items {
-			app.writeJSON(w, http.StatusOK, i)
-		}
+		app.writeJSON(w, http.StatusOK, items)
 	}
 }
 
