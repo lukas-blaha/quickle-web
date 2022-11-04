@@ -13,7 +13,8 @@
 					width: 50%;
 			}
 			.custom-btn {
-				margin: 2em;
+				margin-top: 2em;
+				margin-bottom: 1em;
 			}
 		</style>
     <div class="container">
@@ -33,14 +34,13 @@
 						</div>
 					</div>
 				</div>
+				<hr>
         <div class="row">
             <div class="col">
-								<hr>
-								<a id="prevBtn" class="btn btn-outline-secondary float-end" href="javascript:void(0);">Prev</a>
+								<a id="prevBtn" class="btn btn-lg btn-outline-secondary float-end" href="javascript:void(0);">Prev</a>
             </div>
             <div class="col">
-								<hr>
-									<a id="nextBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Next</a>
+									<a id="nextBtn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">Next</a>
             </div>
         </div>
     </div>
@@ -54,8 +54,8 @@
 			const card = document.getElementById('card');
 			const cardText = document.getElementById('card-text');
 
-			const baseURL = 'http://front-end:8080'
-			const baseApiURL = 'http://data-service:8888'
+			const frontURL = 'http://localhost'
+			const apiURL = 'http://localhost:8888'
 			const deck = '{{.}}';
 
 			let idParam = 0;
@@ -65,7 +65,7 @@
 
 			const showObject = async function(deck, id) {
 				try {
-					const res = await fetch(`${baseApiURL}/deck/${deck}?id=${id}`);
+					const res = await fetch(`${apiURL}/deck/${deck}?id=${id}`);
 					const data = await res.json();
 
 					if (!res.ok) throw new Error(`${data.message}`)
@@ -86,7 +86,7 @@
 
 			const getRange = async function(deck) {
 				try {
-					const deckRange = await fetch(`${baseApiURL}/deck/${deck}/l`);
+					const deckRange = await fetch(`${apiURL}/deck/${deck}/l`);
 					const rng = await deckRange.json();
 
 					if (!deckRange.ok) throw new Error(`${rng.message}`);
@@ -134,7 +134,7 @@
 			});
 
 			backBtn.addEventListener('click', function() {
-				window.location = `${baseURL}/${deck}`;
+				window.location = `${frontURL}/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {

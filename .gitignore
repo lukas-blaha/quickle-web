@@ -1,4 +1,4 @@
 *.sw*
 quickle/db-data/postgres/*
-front-end/frontendApp
+front-end/frontApp
 data-service/dataApp
