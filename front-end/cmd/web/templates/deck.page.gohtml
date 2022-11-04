@@ -48,7 +48,7 @@
 			const writeBtn = document.getElementById("writeBtn");
 			const backBtn = document.getElementById("backBtn");
 
-			const baseURL = 'http://data-service:8080';
+			const baseURL = 'http://front-end:8080';
 
 			cardBtn.addEventListener('click', function() {
 				window.location = `${baseURL}/{{(index . 0).Deck}}/cards`;

@@ -3,6 +3,17 @@ version: '3'
 services:
   data-service:
     build:
+      context: ../front-end
+      dockerfile: ../front-end/front-end.dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  data-service:
+    build:
       context: ../data-service
       dockerfile: ../data-service/data-service.dockerfile
     restart: always

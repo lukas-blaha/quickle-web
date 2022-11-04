@@ -30,7 +30,7 @@
 			{{range .}}
 				const {{.Deck}}Btn = document.getElementById("{{.Deck}}Btn");
 
-				const baseURL = 'http://data-service:8080';
+				const baseURL = 'http://front-end:8080';
 
 				{{.Deck}}Btn.addEventListener('click', function() {
 					window.location = `${baseURL}/{{.Deck}}`;
