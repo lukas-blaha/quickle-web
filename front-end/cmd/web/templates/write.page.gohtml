@@ -32,7 +32,8 @@
 			}
 
 			.custom-btn {
-				margin: 2em;
+				margin-top: 2em;
+				margin-bottom: 1em;
 			}
 		</style>
     <div class="container">
@@ -101,6 +102,11 @@
 									<pre id="correct"><span>0</span></pre>
 								</div>
 							</div>
+							<div class="row">
+								<div class="col">
+									<a id="switchBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin: 2em;">Switch</a>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="col-9">
@@ -125,6 +131,7 @@
 			const backBtn2 = document.getElementById("backBtn2");
 			const sendBtn = document.getElementById("sendBtn");
 			const againBtn = document.getElementById("againBtn");
+			const switchBtn = document.getElementById("switchBtn");
 			const answer = document.getElementById('answer');
 			const termText = document.getElementById('term');
 			const remaining = document.getElementById('remaining');
@@ -135,32 +142,17 @@
 			const incorrectModal = document.getElementById('incorrectModal');
 			const correctModal = document.getElementById('correctModal');
 
-			const baseURL = 'http://front-end:8080';
-			const baseApiURL = 'http://front-end:8888';
+			const frontURL = 'http://localhost';
+			const apiURL = 'http://localhost:8888';
 
 			let fail = [];
 			let deck = '{{.}}';
 			let idParam = 0;
-			let firstId = 0;
-			let lastId = 0;
 			let ids = 0;
 			let len = 0;
 			let term = '';
 			let def = '';
-
-			/*
-			const shuffle = function(array) {
-				const arrLen = array.length;
-				for (let i = (arrLen—1); i > 0; i--){
-				  const j = Math.floor(Math.random() * i);
-				  const temp = array[i];
-				  array[i] = array[j];
-				  array[j] = temp;
-				}
-
-				return array;
-			}
-			*/
+			let switched = false;
 
 			const shuff = function(a) {
 				let j, x, i;
@@ -173,27 +165,20 @@
 				return a;
 			}
 
-			const getArr = function(s, e) {
-				let arr = [];
-				for (let i = s; i < e+1; i++) {
-					arr.push(i);
-				}
-
-				return arr;
-			}
-
 			const getRange = async function(deck) {
 				try {
-					const deckRange = await fetch(`${baseApiURL}/deck/${deck}/l`);
+					const deckRange = await fetch(`${apiURL}/deck/${deck}/l`);
 					const rng = await deckRange.json();
+
+					console.log('deckRange:', deckRange);
+					console.log('rng:', rng);
 
 					if (!deckRange.ok) throw new Error(`${rng.message}`);
 
-					firstId = rng.first;
-					lastId = rng.last;
-					len = lastId - firstId + 1;
-
-					let arr = getArr(firstId, lastId);
+					let arr = rng.id_arr;
+					console.log('arr', arr);
+					len = arr.length;
+					console.log('len:', len);
 					ids = shuff(arr);
 					idParam = ids.shift();
 
@@ -207,13 +192,18 @@
 
 			const showObject = async function(deck, id) {
 				try {
-					const res = await fetch(`${baseApiURL}/deck/${deck}?id=${id}`);
+					const res = await fetch(`${apiURL}/deck/${deck}?id=${id}`);
 					const data = await res.json();
 
 					if (!res.ok) throw new Error(`${data.message}`)
 
-					term = data.term;
-					def = data.definition;
+					if (!switched) {
+						term = data.term;
+						def = data.definition;
+					} else {
+						term = data.definition;
+						def = data.term;
+					}
 
 					termText.textContent = term;
 
@@ -224,7 +214,6 @@
 
 			const sleep = function(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
-				   
 			}
 
 			const changeBtn = function(msg) {
@@ -283,12 +272,21 @@
 				return false;
 			});
 
+			switchBtn.addEventListener('click', function() {
+					if (!switched) {
+						switched = true;
+					} else {
+						switched = false;
+					}
+					showObject(deck, idParam)
+			});
+
 			backBtn.addEventListener('click', function() {
-				window.location = `${baseURL}/${deck}`;
+				window.location = `${frontURL}/${deck}`;
 			});
 
 			backBtn2.addEventListener('click', function() {
-				window.location = `${baseURL}/${deck}`;
+				window.location = `${frontURL}/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {

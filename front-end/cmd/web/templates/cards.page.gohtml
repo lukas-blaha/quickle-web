@@ -58,9 +58,9 @@
 			const apiURL = 'http://localhost:8888'
 			const deck = '{{.}}';
 
-			let idParam = 0;
-			let firstId = 0;
-			let lastId = 0;
+			let ids = 0;
+			let idx = 0;
+			let len = 0;
 			let start = true;
 
 			const showObject = async function(deck, id) {
@@ -91,12 +91,11 @@
 
 					if (!deckRange.ok) throw new Error(`${rng.message}`);
 
-					firstId = rng.first;
-					lastId = rng.last;
-					idParam = firstId;
+					ids = rng.id_arr;
+					len = ids.length;
 
 					if (start) {
-						showObject(deck, idParam);
+						showObject(deck, ids[idx]);
 						start = false;
 					}
 
@@ -107,14 +106,14 @@
 
 			const iterate = function(a) {
 				if (a === 'next') {
-					if (idParam < lastId) {
-						idParam++;
-						showObject(deck, idParam);
+					if (idx < len-1) {
+						idx++;
+						showObject(deck, ids[idx]);
 					}
 				} else if (a === 'prev') {
-					if (idParam > firstId) {
-						idParam--;
-						showObject(deck, idParam);
+					if (idx > 0) {
+						idx--;
+						showObject(deck, ids[idx]);
 					}
 				}
 			}
@@ -122,7 +121,7 @@
 			getRange(deck)
 
 			card.addEventListener('click', function() {
-				showObject(deck, idParam)
+				showObject(deck, ids[idx])
 			});
 
 			nextBtn.addEventListener('click', function() {
@@ -147,7 +146,7 @@
 				}
 
 				if (e.key === ' ') {
-						showObject(deck, idParam);
+						showObject(deck, ids[idx]);
 				}
 			});
     </script>
