@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const webPort = "8080"
+const webPort = "80"
 
 type jsonResponse struct {
 	ID         int    `json:"id"`
@@ -17,10 +17,20 @@ type jsonResponse struct {
 	Definition string `json:"definition"`
 }
 
-type Config struct{}
+type Config struct {
+	Decks []string
+}
 
 func main() {
 	app := Config{}
+
+	deckItems, err := app.getDecks()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, deck := range deckItems {
+		app.Decks = append(app.Decks, deck.Deck)
+	}
 
 	fmt.Printf("Starting front-end service on port %s\n", webPort)
 
@@ -29,7 +39,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
