@@ -48,16 +48,18 @@
 			const writeBtn = document.getElementById("writeBtn");
 			const backBtn = document.getElementById("backBtn");
 
+			const baseURL = 'http://data-service:8080';
+
 			cardBtn.addEventListener('click', function() {
-				window.location = 'http://localhost:8080/{{(index . 0).Deck}}/cards';
+				window.location = `${baseURL}/{{(index . 0).Deck}}/cards`;
 			});
 
 			writeBtn.addEventListener('click', function() {
-				window.location = 'http://localhost:8080/{{(index . 0).Deck}}/write';
+				window.location = `${baseURL}/{{(index . 0).Deck}}/write`;
 			});
 
 			backBtn.addEventListener('click', function() {
-				window.location = 'http://localhost:8080/';
+				window.location = `${baseURL}/`;
 			});
     </script>
 {{end}}

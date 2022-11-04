@@ -11,8 +11,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+var baseURL = "http://data-service:8888"
+
 func (app *Config) getDecks() ([]jsonResponse, error) {
-	decksURL := "http://localhost:8888/decks"
+	decksURL := fmt.Sprintf("%s/decks", baseURL)
 
 	req, err := http.Get(decksURL)
 	if err != nil {
@@ -33,7 +35,7 @@ func (app *Config) getDecks() ([]jsonResponse, error) {
 }
 
 func (app *Config) getItems(deckParam string) ([]jsonResponse, error) {
-	deckURL := fmt.Sprintf("http://localhost:8888/deck/%s", deckParam)
+	deckURL := fmt.Sprintf("%s/deck/%s", baseURL, deckParam)
 
 	req, err := http.Get(deckURL)
 	if err != nil {
@@ -77,7 +79,7 @@ func (app *Config) render(w http.ResponseWriter, t string) *template.Template {
 }
 
 func (app *Config) ListDecks(w http.ResponseWriter, r *http.Request) {
-	tmpl := app.render(w, "menu.page.gohtml")
+	tmpl := app.render(w, "main.page.gohtml")
 
 	items, err := app.getDecks()
 	if err != nil {

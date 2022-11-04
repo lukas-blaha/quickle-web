@@ -54,8 +54,10 @@
 			const card = document.getElementById('card');
 			const cardText = document.getElementById('card-text');
 
+			const baseURL = 'http://front-end:8080'
+			const baseApiURL = 'http://data-service:8888'
+			const deck = '{{.}}';
 
-			let deck = '{{.}}';
 			let idParam = 0;
 			let firstId = 0;
 			let lastId = 0;
@@ -63,7 +65,7 @@
 
 			const showObject = async function(deck, id) {
 				try {
-					const res = await fetch(`http://localhost:8888/deck/${deck}?id=${id}`);
+					const res = await fetch(`${baseApiURL}/deck/${deck}?id=${id}`);
 					const data = await res.json();
 
 					if (!res.ok) throw new Error(`${data.message}`)
@@ -84,7 +86,7 @@
 
 			const getRange = async function(deck) {
 				try {
-					const deckRange = await fetch(`http://localhost:8888/deck/${deck}/l`);
+					const deckRange = await fetch(`${baseApiURL}/deck/${deck}/l`);
 					const rng = await deckRange.json();
 
 					if (!deckRange.ok) throw new Error(`${rng.message}`);
@@ -132,7 +134,7 @@
 			});
 
 			backBtn.addEventListener('click', function() {
-				window.location = `http://localhost:8080/${deck}`;
+				window.location = `${baseURL}/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {
