@@ -14,7 +14,7 @@ import (
 	"github.com/lukas-blaha/quickle-web/data-service/data"
 )
 
-const webPort = "8888"
+const webPort = "80"
 
 var counts int
 
