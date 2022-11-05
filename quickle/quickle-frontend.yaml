@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tls-services
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quickle-frontend
+  namespace: tls-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quickle-frontend
+  template:
+    metadata:
+      labels:
+        app: quickle-frontend
+    spec:
+      containers:
+      - name: quickle-frontend
+        image: lukasblaha/quickle-frontend:1.0.1-arm64
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 80
+            protocol: TCP
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quickle-frontend
+  namespace: tls-services
+spec:
+  selector:
+    app: quickle-frontend
+  ports:
+    - port: 8088
+      targetPort: 80
+      protocol: TCP
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: quickle-frontend
+  namespace: tls-services
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host("quickle.fikos.cz")
+    services:
+    - name: quickle-frontend
+      port: 8088
+  tls:
+    secretName: mytls
