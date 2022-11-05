@@ -5,7 +5,20 @@
 			.hidden {
 			  display: none;
 			}
-			
+			.hidden-answer {
+				outline: 1px solid silver;
+				padding-top: 2em;
+				padding-left: 2em;
+				padding-right: 2em;
+				padding-bottom: 2em;">
+			}
+			.answer {
+				outline: 1px solid silver;
+				padding-top: 2em;
+				padding-left: 2em;
+				padding-right: 2em;
+				padding-bottom: 0;">
+			}
 			.custom-modal {
 			  position: absolute;
 			  top: 50%;
@@ -19,7 +32,6 @@
 			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
 			  z-index: 10;
 			}
-			
 			.overlay {
 			  position: absolute;
 			  top: 0;
@@ -30,7 +42,6 @@
 			  backdrop-filter: blur(3px);
 			  z-index: 5;
 			}
-
 			.custom-btn {
 				margin-top: 2em;
 				margin-bottom: 1em;
@@ -110,12 +121,37 @@
 						</div>
 					</div>
 					<div class="col-9">
-						<div class="mt-1 fs-2 rounded" style="outline: 1px solid silver; padding: 2em;">
-              <pre id="term"><span></span></pre>
+						<div id="response" class="mt-1 fs-2 rounded hidden-answer">
+							<div class="row-cols-1">
+								<pre id="term"><span></span></pre>
+							</div>
 							<hr>
-							<div class="input-group input-group-lg" style="outline: 0px">
-							  <input id="answer" type="text" class="form-control rounded" placeholder="Type here...">
-								<a id="sendBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-left: 1em;">Answer</a>
+							<div class="row-cols-1">
+								<div class="input-group input-group-lg" style="outline: 0px">
+									<input id="answer" type="text" class="form-control rounded" placeholder="Type here...">
+									<a id="sendBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-left: 1em;">Answer</a>
+								</div>
+							</div>
+							<div id="fail" class="container hidden" style="margin-top: 1em; margin-bottom: 0; margin-left: 0; padding-left: 0; padding-bottom: 0;">
+								<div class="row row-cols-2">
+									<div class="col-4">
+										<pre style="font-size: 1.1rem;"><span>Correct definition:</span></pre>
+									</div>
+									<div class="col-2">
+										<pre id="definition" class="text-decoration-underline" style="font-size: 1.1rem;"><span></span></pre>
+									</div>
+								</div>
+								<div class="row row-cols-3">
+									<div class="col-6">
+										<pre style="font-size: 1.1rem;"><span>Do you want to accept your accept?</span></pre>
+									</div>
+									<div class="col-sm-2">
+										<a id="acceptBtn" class="btn btn-outline-secondary rounded float-end" href="javascript:void(0);" style="margin-left: 1em; margin-bottom: 1.4em;">Yes</a>
+									</div>
+									<div class="col">
+										<a id="rejectBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-bottom: 2rem;">No</a>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -141,11 +177,17 @@
 			const overlay = document.querySelector('.overlay');
 			const incorrectModal = document.getElementById('incorrectModal');
 			const correctModal = document.getElementById('correctModal');
+			const response = document.getElementById('response');
+			const failCont = document.getElementById('fail');
+			const acceptBtn = document.getElementById('acceptBtn');
+			const rejectBtn = document.getElementById('rejectBtn');
+			const definition = document.getElementById('definition');
 
 			const frontURL = 'http://localhost';
 			const apiURL = 'http://localhost:8888';
 
 			let fail = [];
+			let failed = false;
 			let deck = '{{.}}';
 			let idParam = 0;
 			let ids = 0;
@@ -170,15 +212,10 @@
 					const deckRange = await fetch(`${apiURL}/deck/${deck}/l`);
 					const rng = await deckRange.json();
 
-					console.log('deckRange:', deckRange);
-					console.log('rng:', rng);
-
 					if (!deckRange.ok) throw new Error(`${rng.message}`);
 
 					let arr = rng.id_arr;
-					console.log('arr', arr);
 					len = arr.length;
-					console.log('len:', len);
 					ids = shuff(arr);
 					idParam = ids.shift();
 
@@ -226,27 +263,60 @@
 				sendBtn.textContent = 'Answer';
 			}
 
-			const manage = function() {
-				if (answer.value === def) {
-					correct.textContent = Number(correct.textContent) + 1;
-					remaining.textContent = Number(remaining.textContent) - 1;
-					changeBtn('Correct!');
-					changeBtnBack();
-				} else {
-					incorrect.textContent = Number(incorrect.textContent) + 1;
-					changeBtn('Wrong!');
-					changeBtnBack();
-					fail.push(idParam);
-					console.log(idParam)
+			const correctAction = function() {
+				correct.textContent = Number(correct.textContent) + 1;
+				remaining.textContent = Number(remaining.textContent) - 1;
+				changeBtn('Correct!');
+				changeBtnBack();
+				hideFailCont();
+				end(Number(correct.textContent));
+				next();
+			}
+
+			const incorrectAction = function() {
+				incorrect.textContent = Number(incorrect.textContent) + 1;
+				changeBtn('Wrong!');
+				changeBtnBack();
+				fail.push(idParam);
+				hideFailCont();
+				next();
+			}
+
+			const hideFailCont = function() {
+				if (!failCont.classList.contains('hidden')) {
+					response.classList.remove('answer');
+					response.classList.add('hidden-answer');
+					failCont.classList.add('hidden');
 				}
 
-				if (Number(correct.textContent) === len) {
+				failed = false;
+			}
+
+			const failAnswer = function() {
+				response.classList.remove('hidden-answer');
+				response.classList.add('answer');
+				failCont.classList.remove('hidden');
+				definition.textContent = def;
+
+				failed = true;
+			}
+
+			const end = function(n) {
+				if (n === len) {
 					correctModal.textContent = len;
 					incorrectModal.textContent = incorrect.textContent;
 					modal.classList.remove('hidden');
 					overlay.classList.remove('hidden');
 				}
-				next();
+			}
+
+			const manage = function() {
+				if (answer.value === def) {
+					correctAction();
+				} else {
+					failAnswer();
+				}
+
 			}
 
 			const next = function() {
@@ -261,15 +331,19 @@
 				}
 			}
 
-			getRange(deck)
-
-			sendBtn.addEventListener('click', function() {
-				manage();
-			});
+			sendBtn.addEventListener('click', manage);
 
 			againBtn.addEventListener('click', function() {
 				location.reload();
 				return false;
+			});
+
+			acceptBtn.addEventListener('click', function() {
+				correctAction();
+			});
+
+			rejectBtn.addEventListener('click', function() {
+				incorrectAction();
 			});
 
 			switchBtn.addEventListener('click', function() {
@@ -291,10 +365,21 @@
 
 			document.addEventListener('keyup', function(e) {
 				if (Number(correct.textContent) < len) {
-					if (e.key === 'Enter') {
-						manage();
+					if (failed) {
+						if (e.key === 'Enter') {
+							correctAction();
+						}
+						if (e.key === 'Escape') {
+							incorrectAction();
+						}
+					} else {
+						if (e.key === 'Enter') {
+							manage();
+						}
 					}
 				}
 			});
+
+			getRange(deck)
     </script>
 {{end}}
