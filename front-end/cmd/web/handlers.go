@@ -40,6 +40,24 @@ func (app *Config) ListItems(w http.ResponseWriter, r *http.Request) {
 	_ = tmpl.Execute(w, items)
 }
 
+func (app *Config) EditItems(w http.ResponseWriter, r *http.Request) {
+	deckParam := chi.URLParam(r, "deck")
+
+	if !app.checkDeck(deckParam) {
+		http.Error(w, "Study set does not exist!", http.StatusBadRequest)
+		return
+	}
+
+	tmpl := app.render(w, "edit.page.gohtml")
+
+	items, err := app.getItems(deckParam)
+	if err != nil {
+		log.Println(err)
+	}
+
+	_ = tmpl.Execute(w, items)
+}
+
 func (app *Config) Cards(w http.ResponseWriter, r *http.Request) {
 	deckParam := chi.URLParam(r, "deck")
 

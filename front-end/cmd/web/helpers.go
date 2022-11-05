@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"text/template"
 )
@@ -74,6 +75,14 @@ func (app *Config) render(w http.ResponseWriter, t string) *template.Template {
 }
 
 func (app *Config) checkDeck(deck string) bool {
+	deckItems, err := app.getDecks()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, deck := range deckItems {
+		app.Decks = append(app.Decks, deck.Deck)
+	}
+
 	for _, d := range app.Decks {
 		if deck == d {
 			return true

@@ -24,14 +24,6 @@ type Config struct {
 func main() {
 	app := Config{}
 
-	deckItems, err := app.getDecks()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, deck := range deckItems {
-		app.Decks = append(app.Decks, deck.Deck)
-	}
-
 	fmt.Printf("Starting front-end service on port %s\n", webPort)
 
 	srv := &http.Server{
@@ -39,7 +31,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

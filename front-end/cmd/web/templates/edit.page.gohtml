@@ -1,0 +1,218 @@
+{{template "base" .}}
+
+{{define "content" }}
+		<style>
+			.custom-row {
+				margin: 1em;
+			}
+			.custom-input {
+				width: 100%;
+			}
+			.custom-btn {
+				margin-top: 2em;
+				margin-bottom: 1em;
+			}
+			.close-modal {
+			  font-size: 2.5rem;
+				height: 3rem;
+			  color: #333;
+			  cursor: pointer;
+			  border: none;
+			  background: none;
+			}
+			.hidden {
+			  display: none;
+			}
+			.custom-modal {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  width: 70%;
+			
+			  background-color: white;
+			  padding: 2rem;
+			  border-radius: 5px;
+			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+			  z-index: 10;
+			}
+			.overlay {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%;
+			  background-color: rgba(0, 0, 0, 0.6);
+			  backdrop-filter: blur(3px);
+			  z-index: 5;
+			}
+		</style>
+		<div class="container">
+      <div class="row row-cols-4">
+        <div class="col-6">
+					<h1 style="margin-top: 2rem;">{{(index . 0).Deck}}</h1>
+        </div>
+        <div class="col">
+					<a id="quitBtn" class="btn btn btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-top: 2.7rem;">Normal Mode</a>
+        </div>
+        <div class="col-sm-2">
+					<a id="delDeckBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);">Delete study</a>
+        </div>
+        <div class="col-sm-1">
+					<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Back</a>
+        </div>
+      </div>
+			<hr>
+			{{range .}}
+			<div class="row row-cols-4 rounded custom-row" style="outline: 1px solid silver; padding: 1em;">
+				<div class="col-5">
+					<div class="mt-1 text-center rounded" style="padding: 1em;">
+						<input id="term{{.ID}}Text" class="form-control-lg custom-input" type="text" value="{{.Term}}">
+					</div>
+				</div>
+				<div class="col-5">
+					<div class="mt-1 text-center rounded" style="padding: 1em;">
+						<input id="def{{.ID}}Text" class="form-control-lg custom-input" type="text" value="{{.Definition}}">
+					</div>
+				</div>
+				<div class="col-sm-1 my-auto">
+					<a id="update{{.ID}}Btn" class="btn btn-lg btn-outline-secondary float-end" href="javascript:void(0);">✔️</a>
+				</div>
+				<div class="col-sm-1 my-auto">
+					<a id="del{{.ID}}Btn" class="btn btn-lg btn-outline-danger" href="javascript:void(0);">🗑️</a>
+				</div>
+			</div>
+			{{end}}
+    </div>
+{{end}}
+
+{{define "js"}}
+		<script>
+			const editBtn = document.getElementById("writeBtn");
+			const delDeckBtn = document.getElementById("delDeckBtn");
+			const backBtn = document.getElementById("backBtn");
+			const termText = document.getElementById("termText");
+			const defText = document.getElementById("defText");
+
+			{{range .}}
+			const update{{.ID}}Btn = document.getElementById("update{{.ID}}Btn");
+			const del{{.ID}}Btn = document.getElementById("del{{.ID}}Btn");
+			{{end}}
+
+			const frontURL = 'http://localhost';
+			const apiURL = 'http://localhost:8888';
+			const deck = '{{(index . 0).Deck}}';
+
+			const sleep = function(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			const changeBtnBack = async function(n) {
+				await sleep(2000);
+				addNewBtn.textContent = n;
+			}
+
+			const addNewItem = function() {
+				if (termText.value === "" || defText.value === "") {
+					addNewBtn.textContent = "Empty!";
+					changeBtnBack('Add');
+				} else {
+					const newItemUrl = `${apiURL}/deck/${deck}`
+					const data = {
+						"term": termText.value,
+						"definition": defText.value
+					};
+					fetch(newItemUrl, {
+						method: "POST",
+						body: JSON.stringify(data),
+						headers: {
+							"Content-Type": "application/json"
+						}
+					});
+					termText.value = "";
+					defText.value = "";
+				}
+			}
+
+			quitBtn.addEventListener('click', function() {
+				window.location = `${frontURL}/${deck}`;
+			});
+
+			delDeckBtn.addEventListener('click', async function() {
+				const newItemUrl = `${apiURL}/deck/${deck}`;
+				await fetch(newItemUrl, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				window.location = `${frontURL}/`;
+			});
+
+			backBtn.addEventListener('click', function() {
+				window.location = `${frontURL}/`;
+			});
+
+			{{range .}}
+			update{{.ID}}Btn.addEventListener('click', async function() {
+				const newItemUrl = `${apiURL}/deck/${deck}/{{.ID}}`;
+				const newTerm = term{{.ID}}Text.value
+				const newDef = def{{.ID}}Text.value
+
+				const data = {
+					"term": newTerm,
+					"definition": newDef
+				};
+
+				if (newTerm === '{{.Term}}' && newDef === '{{.Definition}}') {
+					update{{.ID}}Btn.classList.remove('btn-outline-secondary');
+					update{{.ID}}Btn.classList.add('btn-danger');
+					await sleep(2000)
+					update{{.ID}}Btn.classList.remove('btn-danger');
+					update{{.ID}}Btn.classList.add('btn-outline-secondary');
+				} else {
+					await fetch(newItemUrl, {
+						method: "PATCH",
+						body: JSON.stringify(data),
+						headers: {
+							"Content-Type": "application/json"
+					}
+					});
+
+					update{{.ID}}Btn.classList.remove('btn-outline-secondary');
+					update{{.ID}}Btn.classList.add('btn-success');
+					await sleep(2000)
+					update{{.ID}}Btn.classList.remove('btn-success');
+					update{{.ID}}Btn.classList.add('btn-outline-secondary');
+
+					location.reload();
+					return false;
+				}
+			});
+
+			del{{.ID}}Btn.addEventListener('click', async function() {
+				const newItemUrl = `${apiURL}/deck/${deck}/{{.ID}}`;
+				await fetch(newItemUrl, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				location.reload();
+				return false;
+			});
+			{{end}}
+
+			document.addEventListener('keyup', function(e) {
+				if (e.key == 'Escape' && !modal.classList.contains('hidden')) {
+					modal.classList.add('hidden');
+					overlay.classList.add('hidden');
+					location.reload();
+					return false;
+				}
+				if (e.key == 'Enter' && !modal.classList.contains('hidden')) {
+					addNewItem()
+				}
+			});
+    </script>
+{{end}}

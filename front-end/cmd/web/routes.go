@@ -23,6 +23,7 @@ func (app *Config) routes() http.Handler {
 	mux.Use(middleware.Heartbeat("/ping"))
 	mux.Get("/", app.ListDecks)
 	mux.Get("/{deck}", app.ListItems)
+	mux.Get("/{deck}/edit", app.EditItems)
 	mux.Get("/{deck}/cards", app.Cards)
 	mux.Get("/{deck}/write", app.WriteMode)
 
