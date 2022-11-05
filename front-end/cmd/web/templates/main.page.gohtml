@@ -2,6 +2,47 @@
 
 {{define "content" }}
 		<style>
+			.custom-cont {
+				font-size: 2.5vh;
+			}
+			.custom-btn {
+				margin-top: 2em;
+				margin-bottom: 1em;
+			}
+			.close-modal {
+			  font-size: 2.5rem;
+				height: 3rem;
+			  color: #333;
+			  cursor: pointer;
+			  border: none;
+			  background: none;
+			}
+			.hidden {
+			  display: none;
+			}
+			.custom-modal {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  width: 70%;
+			
+			  background-color: white;
+			  padding: 2rem;
+			  border-radius: 5px;
+			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+			  z-index: 10;
+			}
+			.overlay {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%;
+			  background-color: rgba(0, 0, 0, 0.6);
+			  backdrop-filter: blur(3px);
+			  z-index: 5;
+			}
 			.deck {
 				margin: 1em;
 				width: 80%;
@@ -9,32 +50,202 @@
 			}
 		</style>
     <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1 class="mt-5">Study sets</h1>
-                <hr>
-            </div>
-        </div>
-				<div class="row row-cols-3">
-				{{range .}}
-					<div class="col text-center">
-						<a id="{{.Deck}}Btn" class="btn btn-lg btn-outline-secondary deck" href="javascript:void(0);">{{.Deck}}</a>
+			<div id="modal1" class="custom-modal hidden">
+				<div class="row row-cols-1">
+					<div class="col">
+						<button id="close1Btn"class="close-modal float-end">&times;</button>
 					</div>
-				{{end}}
 				</div>
+				<div class="row row-cols-2">
+					<div class="col-9">
+						<div class="input-group input-group-lg" style="outline: 0px">
+						  <input id="deckText" type="text" class="form-control rounded" placeholder="Study set here..." style="margin-top: 2em;">
+						</div>
+					</div>
+					<div class="col-sm-2">
+						<div class="col text-center">
+							<a id="addDeckBtn" class="btn btn-lg btn-outline-secondary custom-btn" href="javascript:void(0);">Add set</a>
+						</div>
+					</div>
+				</div>
+				<hr>
+			</div>
+			<div id="modal2" class="custom-modal hidden">
+				<div class="row row-cols-1">
+					<div class="col">
+						<button id="close2Btn" class="close-modal float-end">&times;</button>
+					</div>
+				</div>
+				<div class="row row-cols-2">
+					<div class="col">
+						<div class="input-group input-group-lg" style="outline: 0px">
+						  <input id="termText" type="text" class="form-control rounded" placeholder="Term here..." style="margin-top: 2em;">
+						</div>
+					</div>
+					<div class="col">
+						<div class="input-group input-group-lg" style="outline: 0px">
+						  <input id="defText" type="text" class="form-control rounded" placeholder="Definition here..." style="margin-top: 2em;">
+						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="row row-cols-1">
+					<div class="col text-center">
+						<a id="addNewBtn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">Add</a>
+					</div>
+				</div>
+			</div>
+			<div class="overlay hidden"></div>
+      <div class="row">
+        <div class="col">
+          <h1 class="mt-5">Study sets</h1>
+        </div>
+				<div class="col">
+					<a id="createBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
+				</div>
+      </div>
+      <hr>
+			<div class="row row-cols-3">
+			{{range .}}
+				<div class="col text-center">
+					<a id="{{.Deck}}Btn" class="btn btn-lg btn-outline-secondary deck" href="javascript:void(0);">{{.Deck}}</a>
+				</div>
+			{{end}}
+			</div>
     </div>
 {{end}}
 
 {{define "js"}}
 		<script>
+			const createBtn = document.getElementById('createBtn');
+			const firstModal = document.getElementById('modal1');
+			const firstCloseBtn = document.getElementById('close1Btn');
+			const deckText = document.getElementById("deckText");
+			const addDeckBtn = document.getElementById("addDeckBtn");
+
+			const secModal = document.getElementById('modal2');
+			const addNewBtn = document.getElementById('addNewBtn');
+			const secCloseBtn = document.getElementById('close2Btn');
+			const termText = document.getElementById("termText");
+			const defText = document.getElementById("defText");
+			const overlay = document.querySelector('.overlay');
+
+			const frontURL = 'http://localhost';
+			const apiURL = 'http://localhost:8888';
+
+			let deck = '';
+
+			const sleep = function(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			const changeFirstBtnBack = async function(n) {
+				await sleep(2000);
+				addDeckBtn.textContent = n;
+			}
+
+			const changeSecBtnBack = async function(n) {
+				await sleep(2000);
+				addNewBtn.textContent = n;
+			}
+
+			const addNewItem = function() {
+				if (termText.value === "" || defText.value === "") {
+					addNewBtn.textContent = "Empty!";
+					changeSecBtnBack('Add');
+				} else {
+					const newItemUrl = `${apiURL}/deck/${deck}`
+					const data = {
+						"term": termText.value,
+						"definition": defText.value
+					};
+					fetch(newItemUrl, {
+						method: "POST",
+						body: JSON.stringify(data),
+						headers: {
+							"Content-Type": "application/json"
+						}
+					});
+					termText.value = "";
+					defText.value = "";
+				}
+			}
+
+			const addNewDeck = function() {
+				if (deckText.value === "") {
+					addDeckBtn.textContent = "Empty!";
+					changeFirstBtnBack('Add set');
+				} else {
+					sleep(200)
+					deck = deckText.value;
+					deckText.value = "";
+					firstModal.classList.add('hidden');
+					secModal.classList.remove('hidden');
+				}
+			}
+
 			{{range .}}
 				const {{.Deck}}Btn = document.getElementById("{{.Deck}}Btn");
 
-				const baseURL = 'http://front-end:8080';
-
 				{{.Deck}}Btn.addEventListener('click', function() {
-					window.location = `${baseURL}/{{.Deck}}`;
+					window.location = `${frontURL}/{{.Deck}}`;
 				});
 			{{end}}
+
+			createBtn.addEventListener('click', function() {
+				firstModal.classList.remove('hidden');
+				overlay.classList.remove('hidden');
+			});
+
+			addNewBtn.addEventListener('click', addNewItem);
+			addDeckBtn.addEventListener('click', addNewDeck);
+
+			firstCloseBtn.addEventListener('click', function() {
+				modal1.classList.add('hidden');
+				overlay.classList.add('hidden');
+				location.reload();
+				return false;
+			});
+
+			secCloseBtn.addEventListener('click', function() {
+				modal2.classList.add('hidden');
+				overlay.classList.add('hidden');
+				location.reload();
+				return false;
+			});
+
+			overlay.addEventListener('click', function() {
+				if (!modal1.classList.contains('hidden')) {
+					modal1.classList.add('hidden');
+				}
+				if (!modal2.classList.contains('hidden')) {
+					modal2.classList.add('hidden');
+				}
+				overlay.classList.add('hidden');
+				location.reload();
+				return false;
+			});
+
+			document.addEventListener('keyup', function(e) {
+				if (e.key == 'Escape') {
+					if (!modal1.classList.contains('hidden')) {
+						modal1.classList.add('hidden');
+					}
+					if (!modal2.classList.contains('hidden')) {
+						modal2.classList.add('hidden');
+					}
+					overlay.classList.add('hidden');
+					location.reload();
+					return false;
+				}
+				if (e.key == 'Enter') {
+					if (!modal1.classList.contains('hidden')) {
+						addNewDeck()
+					}
+					if (!modal2.classList.contains('hidden')) {
+						addNewItem()
+					}
+				}
+			});
     </script>
 {{end}}

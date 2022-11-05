@@ -118,8 +118,6 @@
 				}
 			}
 
-			getRange(deck)
-
 			card.addEventListener('click', function() {
 				showObject(deck, ids[idx])
 			});
@@ -149,5 +147,7 @@
 						showObject(deck, ids[idx]);
 				}
 			});
+
+			getRange(deck)
     </script>
 {{end}}
