@@ -5,8 +5,15 @@
 			* {
 				color: white;
 			}
+			html {
+				background-color: #090A2D;
+				width: 100%;
+				height: 100%;
+			}
 			body {
 				background-color: #090A2D;
+				width: 100%;
+				height: 100%;
 			}
 			.hidden {
 			  display: none;
@@ -189,8 +196,7 @@
 			const rejectBtn = document.getElementById('rejectBtn');
 			const definition = document.getElementById('definition');
 
-			const frontURL = 'http://localhost';
-			const apiURL = 'http://localhost:8888';
+			const apiURL = 'https://quickle-api.fikos.cz';
 
 			let fail = [];
 			let failed = false;
@@ -362,11 +368,11 @@
 			});
 
 			backBtn.addEventListener('click', function() {
-				window.location = `${frontURL}/${deck}`;
+				window.location.pathname = `/${deck}`;
 			});
 
 			backBtn2.addEventListener('click', function() {
-				window.location = `${frontURL}/${deck}`;
+				window.location.pathname = `/${deck}`;
 			});
 
 			document.addEventListener('keyup', function(e) {

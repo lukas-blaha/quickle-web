@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,9 @@ import (
 	"net/http"
 	"text/template"
 )
+
+//go:embed templates
+var templateFS embed.FS
 
 func (app *Config) getDecks() ([]jsonResponse, error) {
 	decksURL := fmt.Sprintf("%s/decks", apiURL)
@@ -53,19 +57,19 @@ func (app *Config) getItems(deckParam string) ([]jsonResponse, error) {
 
 func (app *Config) render(w http.ResponseWriter, t string) *template.Template {
 	partials := []string{
-		"./cmd/web/templates/base.layout.gohtml",
-		"./cmd/web/templates/header.partial.gohtml",
-		"./cmd/web/templates/footer.partial.gohtml",
+		"templates/base.layout.gohtml",
+		"templates/header.partial.gohtml",
+		"templates/footer.partial.gohtml",
 	}
 
 	var templateSlice []string
-	templateSlice = append(templateSlice, fmt.Sprintf("./cmd/web/templates/%s", t))
+	templateSlice = append(templateSlice, fmt.Sprintf("templates/%s", t))
 
 	for _, x := range partials {
 		templateSlice = append(templateSlice, x)
 	}
 
-	tmpl, err := template.ParseFiles(templateSlice...)
+	tmpl, err := template.ParseFS(templateFS, templateSlice...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil

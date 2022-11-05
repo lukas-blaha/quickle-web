@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var apiURL = "http://localhost:8888"
+var apiURL = "https://quickle-api.fikos.cz"
 
 func (app *Config) ListDecks(w http.ResponseWriter, r *http.Request) {
 	tmpl := app.render(w, "main.page.gohtml")
