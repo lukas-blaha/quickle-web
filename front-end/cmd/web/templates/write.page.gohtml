@@ -2,18 +2,24 @@
 
 {{define "content" }}
 		<style>
+			* {
+				color: white;
+			}
+			body {
+				background-color: #090A2D;
+			}
 			.hidden {
 			  display: none;
 			}
 			.hidden-answer {
-				outline: 1px solid silver;
+				outline: 1px solid white;
 				padding-top: 2em;
 				padding-left: 2em;
 				padding-right: 2em;
 				padding-bottom: 2em;">
 			}
 			.answer {
-				outline: 1px solid silver;
+				outline: 1px solid white;
 				padding-top: 2em;
 				padding-left: 2em;
 				padding-right: 2em;
@@ -26,7 +32,7 @@
 			  transform: translate(-50%, -50%);
 			  width: 70%;
 			
-			  background-color: white;
+				background-color: #2D3856;
 			  padding: 2rem;
 			  border-radius: 5px;
 			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
@@ -68,10 +74,10 @@
 					</div>
 					<div class="row">
 						<div class="col">
-							<a id="againBtn" class="btn btn-outline-secondary float-end" href="javascript:void(0);">Try again</a>
+							<a id="againBtn" class="btn btn-dark float-end" href="javascript:void(0);">Try again</a>
 						</div>
 						<div class="col">
-							<a id="backBtn2" class="btn btn-outline-secondary float-start" href="javascript:void(0);">Back</a>
+							<a id="backBtn2" class="btn btn-dark float-start" href="javascript:void(0);">Back</a>
 						</div>
 					</div>
 				</div>
@@ -82,7 +88,7 @@
                 <h1 class="mt-5">Write</h1>
             </div>
 					<div class="col">
-						<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
+						<a id="backBtn" class="btn btn-lg btn-outline-warning rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
 					</div>
         </div>
 				<hr>
@@ -121,7 +127,7 @@
 						</div>
 					</div>
 					<div class="col-9">
-						<div id="response" class="mt-1 fs-2 rounded hidden-answer">
+						<div id="response" class="mt-1 fs-2 rounded hidden-answer" style="background-color: #2D3856;">
 							<div class="row-cols-1">
 								<pre id="term"><span></span></pre>
 							</div>
@@ -129,7 +135,7 @@
 							<div class="row-cols-1">
 								<div class="input-group input-group-lg" style="outline: 0px">
 									<input id="answer" type="text" class="form-control rounded" placeholder="Type here...">
-									<a id="sendBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-left: 1em;">Answer</a>
+									<a id="sendBtn" class="btn btn-dark rounded" href="javascript:void(0);" style="margin-left: 1em;">Answer</a>
 								</div>
 							</div>
 							<div id="fail" class="container hidden" style="margin-top: 1em; margin-bottom: 0; margin-left: 0; padding-left: 0; padding-bottom: 0;">
@@ -146,10 +152,10 @@
 										<pre style="font-size: 1.1rem;"><span>Do you want to accept your accept?</span></pre>
 									</div>
 									<div class="col-sm-2">
-										<a id="acceptBtn" class="btn btn-outline-secondary rounded float-end" href="javascript:void(0);" style="margin-left: 1em; margin-bottom: 1.4em;">Yes</a>
+										<a id="acceptBtn" class="btn btn-dark rounded float-end" href="javascript:void(0);" style="margin-left: 1em; margin-bottom: 1.4em;">Yes</a>
 									</div>
 									<div class="col">
-										<a id="rejectBtn" class="btn btn-outline-secondary rounded" href="javascript:void(0);" style="margin-bottom: 2rem;">No</a>
+										<a id="rejectBtn" class="btn btn-dark rounded" href="javascript:void(0);" style="margin-bottom: 2rem;">No</a>
 									</div>
 								</div>
 							</div>

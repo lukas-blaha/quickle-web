@@ -2,6 +2,12 @@
 
 {{define "content" }}
 		<style>
+			* {
+				color: white;
+			}
+			body {
+				background-color: #090A2D;
+			}
 			.custom-cont {
 				font-size: 2.5vh;
 			}
@@ -12,7 +18,7 @@
 			.close-modal {
 			  font-size: 2.5rem;
 				height: 3rem;
-			  color: #333;
+			  color: white;
 			  cursor: pointer;
 			  border: none;
 			  background: none;
@@ -27,7 +33,7 @@
 			  transform: translate(-50%, -50%);
 			  width: 70%;
 			
-			  background-color: white;
+				background-color: #2D3856;
 			  padding: 2rem;
 			  border-radius: 5px;
 			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
@@ -64,7 +70,7 @@
 					</div>
 					<div class="col-sm-2">
 						<div class="col text-center">
-							<a id="addDeckBtn" class="btn btn-lg btn-outline-secondary custom-btn" href="javascript:void(0);">Add set</a>
+							<a id="addDeckBtn" class="btn btn-lg btn-dark custom-btn" href="javascript:void(0);">Add set</a>
 						</div>
 					</div>
 				</div>
@@ -91,26 +97,28 @@
 				<hr>
 				<div class="row row-cols-1">
 					<div class="col text-center">
-						<a id="addNewBtn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">Add</a>
+						<a id="addNewBtn" class="btn btn-lg btn-dark" href="javascript:void(0);">Add</a>
 					</div>
 				</div>
 			</div>
 			<div class="overlay hidden"></div>
       <div class="row">
         <div class="col">
-          <h1 class="mt-5">Study sets</h1>
+          <h1 class="mt-5">Quickle</h1>
         </div>
 				<div class="col">
-					<a id="createBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
+					<a id="createBtn" class="btn btn-lg btn-outline-warning rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
 				</div>
       </div>
       <hr>
-			<div class="row row-cols-3">
-			{{range .}}
-				<div class="col text-center">
-					<a id="{{.Deck}}Btn" class="btn btn-lg btn-outline-secondary deck" href="javascript:void(0);">{{.Deck}}</a>
+			<div class="container rounded" style="outline: 1px solid white; background-color: #2D3856;">
+				<div class="row row-cols-3">
+				{{range .}}
+					<div class="col text-center">
+						<a id="{{.Deck}}Btn" class="btn btn-lg btn-outline-light deck" href="javascript:void(0);">{{.Deck}}</a>
+					</div>
+				{{end}}
 				</div>
-			{{end}}
 			</div>
     </div>
 {{end}}
@@ -176,7 +184,6 @@
 					addDeckBtn.textContent = "Empty!";
 					changeFirstBtnBack('Add set');
 				} else {
-					sleep(200)
 					deck = deckText.value;
 					deckText.value = "";
 					firstModal.classList.add('hidden');
@@ -241,8 +248,7 @@
 				if (e.key == 'Enter') {
 					if (!modal1.classList.contains('hidden')) {
 						addNewDeck()
-					}
-					if (!modal2.classList.contains('hidden')) {
+					} else if (!modal2.classList.contains('hidden')) {
 						addNewItem()
 					}
 				}

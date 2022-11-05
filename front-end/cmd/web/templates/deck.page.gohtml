@@ -2,11 +2,21 @@
 
 {{define "content" }}
 		<style>
+			* {
+				color: white;
+			}
+			body {
+				background-color: #090A2D;
+			}
 			.custom-row {
 				margin: 1em;
+				background-color: #2D3856;
 			}
 			.custom-input {
 				width: 100%;
+				background-color: #2D3856;
+				border: 0;
+				outline: 1px solid grey;
 			}
 			.custom-btn {
 				margin-top: 2em;
@@ -15,7 +25,7 @@
 			.close-modal {
 			  font-size: 2.5rem;
 				height: 3rem;
-			  color: #333;
+			  color: white;
 			  cursor: pointer;
 			  border: none;
 			  background: none;
@@ -30,7 +40,7 @@
 			  transform: translate(-50%, -50%);
 			  width: 70%;
 			
-			  background-color: white;
+				background-color: #2D3856;
 			  padding: 2rem;
 			  border-radius: 5px;
 			  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
@@ -69,17 +79,17 @@
 				<hr>
 				<div class="row row-cols-1">
 					<div class="col text-center">
-						<a id="addNewBtn" class="btn btn-lg btn-outline-secondary" href="javascript:void(0);">Add</a>
+						<a id="addNewBtn" class="btn btn-lg btn-dark" href="javascript:void(0);">Add</a>
 					</div>
 				</div>
 			</div>
 			<div class="overlay hidden"></div>
       <div class="row row-cols-4">
 				<div class="col-sm-1">
-					<a id="cardBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Cards</a>
+					<a id="cardBtn" class="btn btn-lg btn-outline-warning rounded custom-btn" href="javascript:void(0);">Cards</a>
         </div>
         <div class="col-1">
-					<a id="writeBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Write</a>
+					<a id="writeBtn" class="btn btn-lg btn-outline-warning rounded custom-btn" href="javascript:void(0);">Write</a>
         </div>
         <div class="col-4">
 					<h1 style="margin-top: 2rem;">{{(index . 0).Deck}}</h1>
@@ -88,10 +98,10 @@
 					<a id="editBtn" class="btn btn btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-top: 2.7rem;">Edit Mode</a>
         </div>
         <div class="col-sm-2">
-					<a id="createBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
+					<a id="createBtn" class="btn btn-lg btn-outline-warning rounded custom-btn float-end" href="javascript:void(0);">+ Add new</a>
         </div>
         <div class="col-sm-1">
-					<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn" href="javascript:void(0);">Back</a>
+					<a id="backBtn" class="btn btn-lg btn-outline-warning rounded custom-btn" href="javascript:void(0);">Back</a>
         </div>
       </div>
 			<hr>

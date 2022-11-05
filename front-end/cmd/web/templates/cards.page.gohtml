@@ -2,6 +2,12 @@
 
 {{define "content" }}
 		<style>
+			* {
+				color: white;
+			}
+			body {
+				background-color: #090A2D;
+			}
 			.centered{
 					position: relative;
 				  top:50%;
@@ -23,13 +29,13 @@
               <h1 class="mt-5">Cards</h1>
           </div>
 					<div class="col">
-						<a id="backBtn" class="btn btn-lg btn-outline-secondary rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
+						<a id="backBtn" class="btn btn-lg btn-outline-warning rounded custom-btn float-end" href="javascript:void(0);" style="margin-left: 1em;">Back</a>
 					</div>
         </div>
         <hr>
         <div class="row row-cols-1">
 					<div class="col">
-						<div id="card" class="mt-1 text-center fs-1 rounded my-auto card" style="outline: 1px solid silver; padding: 2em;">
+						<div id="card" class="mt-1 text-center fs-1 rounded my-auto card" style="outline: 1px solid white; padding: 2em; background-color: #2D3856;">
               <pre id="card-text"><span class="centered"></span></pre>
 						</div>
 					</div>
